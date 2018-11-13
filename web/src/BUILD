@@ -1,0 +1,137 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@angular//:index.bzl", "ng_module")
+load("@build_bazel_rules_typescript//:defs.bzl", "ts_library", "ts_web_test_suite")
+load("@build_bazel_rules_nodejs//:defs.bzl", "rollup_bundle", "history_server")
+load("@build_bazel_rules_nodejs//internal/web_package:web_package.bzl", "web_package")
+load("@build_bazel_rules_typescript//:defs.bzl", "ts_devserver")
+load("//tools/webpack:webpack_bundle.bzl", "webpack_bundle")
+
+_ROOT_PATHS = [
+    "npm/node_modules/zone.js/dist",
+    "npm/node_modules/systemjs/dist",
+    "npm/node_modules/@ngrx/store/bundles",
+    "npm/node_modules/grpc-web-client/dist",
+    "npm/node_modules/browser-headers/dist",
+]
+
+ng_module(
+    name = "app",
+    srcs = glob(["**/*.ts"], exclude = ["**/*.spec.ts"]),
+    assets = glob([
+      "**/*.css",
+      "**/*.html",
+    ]),
+    tsconfig = "//:tsconfig.json",
+    deps = [
+        "@angular//packages/core",
+        "@angular//packages/platform-browser",
+        "@npm//@types",
+        "@npm//@ngrx/store",
+        "@npm//grpc-web-client",
+        "//api_proto:hello_ts_proto",
+    ]
+)
+
+genrule(
+    name = "google_protobuf_requirejs",
+    srcs = ["@npm//node_modules/google-protobuf:google-protobuf.js"],
+    outs = ["google-protobuf.js"],
+    cmd = """echo "define('google-protobuf', function(require, exports, module) {" > $@ \
+             && cat $< >> $@ \
+             && echo '});' >> $@""",
+)
+
+ts_devserver(
+    name = "devserver",
+    port = 4200,
+    additional_root_paths = _ROOT_PATHS,
+    entry_module = "mono_repo/web/src/main",
+    index_html = "index.html",
+    scripts = [
+        ":require.config.js",
+        "@npm//node_modules/tslib:tslib.js",
+    ],
+    data = [
+        "@npm//node_modules/@ngrx/store:bundles/store.umd.js",
+        "@npm//node_modules/grpc-web-client:dist/grpc-web-client.umd.js",
+        "@npm//node_modules/browser-headers:dist/browser-headers.umd.js",
+    ],
+    static_files = [
+        "@npm//node_modules/zone.js:dist/zone.min.js",
+        "@npm//node_modules/systemjs:dist/system.min.js",
+        "favicon.ico",
+    ],
+    deps = [
+        ":google_protobuf_requirejs",
+        ":app"
+    ],
+)
+
+ts_library(
+    name = "test_lib",
+    testonly = 1,
+    srcs = glob(["**/*.spec.ts"]),
+    deps = [
+        ":app",
+        "@angular//packages/core/testing",
+        "@angular//packages/platform-browser-dynamic/testing",
+        "@npm//@types",
+    ],
+)
+
+ts_web_test_suite(
+    name = "test",
+    srcs = [
+        "@npm//node_modules/tslib:tslib.js",
+        "require-test.config.js",
+    ],
+    # do not sort
+    bootstrap = [
+        "@npm//node_modules/zone.js:dist/zone-testing-bundle.js",
+        "@npm//node_modules/reflect-metadata:Reflect.js",
+    ],
+    browsers = [
+        "@io_bazel_rules_webtesting//browsers:chromium-local",
+        # TODO(gregmagolan): re-enable firefox testing once fixed
+        # See https://github.com/bazelbuild/rules_typescript/issues/296
+        # "@io_bazel_rules_webtesting//browsers:firefox-local",
+    ],
+    static_files = [
+        "@npm//node_modules/grpc-web-client:dist/grpc-web-client.umd.js",
+        "@npm//node_modules/browser-headers:dist/browser-headers.umd.js",
+    ],
+    deps = [
+        ":google_protobuf_requirejs",
+        ":test_lib",
+    ],
+)
+
+webpack_bundle(
+    name = "bundle",
+    entry_point = "web/src/main",
+    deps = [
+        "//web/src:app",
+        "@npm//@ngrx/store",
+        "@npm//grpc-web-client",
+    ]
+)
+
+web_package(
+    name = "prodapp",
+    additional_root_paths = _ROOT_PATHS,
+    # Do not sort
+    assets = [
+        "@npm//node_modules/zone.js:dist/zone.min.js",
+        "@npm//node_modules/systemjs:dist/system.js",
+        ":bundle.min.js"
+    ],
+    data = [":bundle"],
+    index_html = "index.html"
+)
+
+history_server(
+    name = "prodserver",
+    data = [":prodapp"],
+    templated_args = ["web/src/prodapp"]
+)

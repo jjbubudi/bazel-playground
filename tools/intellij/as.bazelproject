@@ -1,0 +1,19 @@
+directories:
+  3rdparty
+  android
+  api_proto
+  tools
+
+targets:
+  //3rdparty/...
+  //android/...
+  //api_proto/...
+  //tools/...
+
+android_sdk_platform: android-28
+
+workspace_type: android
+
+additional_languages:
+  android
+  kotlin

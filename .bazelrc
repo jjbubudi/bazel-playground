@@ -1,0 +1,13 @@
+build --strategy=TypeScriptCompile=worker
+build --strategy=AngularTemplateCompile=worker
+build --strategy=Scalac=worker
+
+# Use the Angular 6 compiler
+build --define=compile=legacy
+
+build --symlink_prefix=dist/
+build --experimental_ui
+test --experimental_ui
+
+build --show_result=0
+test --test_output=errors

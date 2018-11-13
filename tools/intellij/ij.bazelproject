@@ -1,0 +1,14 @@
+directories:
+  3rdparty
+  api
+  api_proto
+  tools
+
+targets:
+  //3rdparty/...
+  //api/...
+  //api_proto/...
+  //tools/...
+
+additional_languages:
+  scala

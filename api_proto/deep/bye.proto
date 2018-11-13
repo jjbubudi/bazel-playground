@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package com.fp.deep;
+
+message Bye {
+    string message = 1;
+}

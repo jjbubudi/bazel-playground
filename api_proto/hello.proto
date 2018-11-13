@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package com.fp;
+
+import "api_proto/deep/bye.proto";
+
+service HelloService {
+    rpc SayHello (HelloRequest) returns (HelloReply) {}
+    rpc SayBye(com.fp.deep.Bye) returns (stream HelloReply) {}
+}
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloReply {
+    string message = 1;
+}
+
+message HelloMix {
+    com.fp.deep.Bye bye = 1;
+    string hi = 2;
+}

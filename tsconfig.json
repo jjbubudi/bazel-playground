@@ -1,0 +1,22 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strict": true,
+    "alwaysStrict": true,
+    "lib": [
+      "es2018",
+      "dom"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "mono_repo/*": ["dist/bin/*"]
+    },
+  },
+  "bazelOptions": {
+    "suppressTsconfigOverrideWarnings": true
+  },
+  "exclude": ["bazel-out", "dist"]
+}
