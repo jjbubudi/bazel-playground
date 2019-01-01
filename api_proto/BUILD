@@ -1,6 +1,6 @@
 load("@io_grpc_grpc_java//:java_grpc_library.bzl", "java_grpc_library")
 load("//tools:scala_rules.bzl", "scalapb_proto_library")
-load("//tools:grpc_web.bzl", "typescript_proto_library")
+load("//tools:grpc_web/defs.bzl", "typescript_proto_library")
 
 proto_library(
     name = "hello_proto",

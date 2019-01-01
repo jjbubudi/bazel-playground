@@ -1,1 +1,13 @@
 package(default_visibility = ["//tools/grpc_web:__subpackages__"])
+
+load("@build_bazel_rules_nodejs//:defs.bzl", "nodejs_binary")
+
+nodejs_binary(
+    name = "wrap_amd",
+    args = ["--node_options=--expose-gc"],
+    data = ["run_wrap_amd.js"],
+    entry_point = "mono_repo/tools/grpc_web/run_wrap_amd",
+    node_modules = "@ts_protoc_gen_deps//:node_modules",
+    install_source_map_support = False,
+    visibility = ["//visibility:public"]
+)

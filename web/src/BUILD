@@ -33,15 +33,6 @@ ng_module(
     ]
 )
 
-genrule(
-    name = "google_protobuf_requirejs",
-    srcs = ["@npm//node_modules/google-protobuf:google-protobuf.js"],
-    outs = ["google-protobuf.js"],
-    cmd = """echo "define('google-protobuf', function(require, exports, module) {" > $@ \
-             && cat $< >> $@ \
-             && echo '});' >> $@""",
-)
-
 ts_devserver(
     name = "devserver",
     port = 4200,
@@ -63,7 +54,7 @@ ts_devserver(
         "favicon.ico",
     ],
     deps = [
-        ":google_protobuf_requirejs",
+        "//:google_protobuf_umd",
         ":app"
     ],
 )
@@ -102,7 +93,7 @@ ts_web_test_suite(
         "@npm//node_modules/browser-headers:dist/browser-headers.umd.js",
     ],
     deps = [
-        ":google_protobuf_requirejs",
+        "//:google_protobuf_umd",
         ":test_lib",
     ],
 )
@@ -123,7 +114,7 @@ web_package(
     # Do not sort
     assets = [
         "@npm//node_modules/zone.js:dist/zone.min.js",
-        "@npm//node_modules/systemjs:dist/system.js",
+        "@npm//node_modules/systemjs:dist/system.min.js",
         ":bundle.min.js"
     ],
     data = [":bundle"],

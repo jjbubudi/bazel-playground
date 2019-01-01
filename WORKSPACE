@@ -160,7 +160,7 @@ rules_typescript_dependencies()
 load("@build_bazel_rules_typescript//:defs.bzl", "ts_setup_workspace")
 ts_setup_workspace()
 
-load("//tools:grpc_web.bzl", "typescript_proto_dependencies")
+load("//tools/grpc_web:defs.bzl", "typescript_proto_dependencies")
 typescript_proto_dependencies()
 
 ######################

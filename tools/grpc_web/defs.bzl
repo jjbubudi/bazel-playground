@@ -1,6 +1,6 @@
 load("@build_bazel_rules_nodejs//:defs.bzl", "yarn_install")
 
-TMP_DIR = "__tmp"
+TMP_DIR = "_ts_protoc_gen"
 
 TypescriptProtoLibraryAspect = provider(
     fields = {
@@ -48,7 +48,6 @@ def typescript_proto_library_aspect_(target, ctx):
     dts_outputs = []
     proto_inputs = []
 
-    inputs = depset([ctx.file._protoc])
     for src in target.proto.direct_sources:
         if src.extension != "proto":
             fail("Input must be a proto file")
@@ -58,29 +57,28 @@ def typescript_proto_library_aspect_(target, ctx):
         proto_inputs.append(normalized_file)
         append_to_outputs(ctx, file_name, js_outputs, dts_outputs)
 
-    outputs = dts_outputs + js_outputs
-
-    inputs += ctx.files._ts_protoc_gen
+    inputs = depset(ctx.files._ts_protoc_gen)
     inputs += target.proto.direct_sources
     inputs += target.proto.transitive_descriptor_sets
-
-    tmp = ctx.actions.declare_directory(TMP_DIR)
     tmpDir = "/".join([ctx.bin_dir.path, ctx.label.package, TMP_DIR])
 
+    args = ctx.actions.args()
+    args.add(ctx.files._ts_protoc_gen[1], format = "--plugin=protoc-gen-ts=%s")
+    args.add(tmpDir, format = "--ts_out=service=true:%s")
+    args.add(tmpDir, format = "--js_out=import_style=commonjs,binary:%s")
+    args.add_joined(
+        target.proto.transitive_descriptor_sets,
+        join_with = ":",
+        format_joined = "--descriptor_set_in=%s"
+    )
+    args.add_all(proto_inputs)
+
     ctx.actions.run(
-        inputs = inputs ,
-        outputs = outputs + [tmp],
+        inputs = inputs,
+        outputs = dts_outputs + js_outputs,
         progress_message = "Creating Typescript pb files %s" % ctx.label,
         executable = ctx.executable._protoc,
-        arguments = [
-            "--plugin=protoc-gen-ts=%s" % (ctx.files._ts_protoc_gen[1].path),
-            "--ts_out=service=true:%s" % (tmpDir),
-            "--js_out=import_style=commonjs,binary:%s" % (tmpDir),
-            "--descriptor_set_in=%s" % (":".join(
-                [desc.path for desc in target.proto.transitive_descriptor_sets]
-                )),
-            "%s" % (" ".join(proto_inputs))
-        ]
+        arguments = [args]
     )
 
     js_outs = []
@@ -90,7 +88,7 @@ def typescript_proto_library_aspect_(target, ctx):
         js_outs.append(_wrap_amd(ctx, o))
 
     for o in dts_outputs:
-        dts_outs.append(_wrap_amd(ctx, o))
+        dts_outs.append(_copy_file(ctx, o))
 
     deps_js = depset([])
     deps_dts = depset([])
@@ -128,7 +126,7 @@ typescript_proto_library_aspect = aspect(
             allow_files = True,
             executable = True,
             cfg = "host",
-            default = Label("//tools/javascript:wrap_amd")
+            default = Label("//tools/grpc_web:wrap_amd")
         )
     },
 )
@@ -137,10 +135,10 @@ def _wrap_amd(ctx, input):
     output = ctx.actions.declare_file(input.basename)
 
     args = ctx.actions.args()
-    args.add([ctx.bin_dir.path])
-    args.add([ctx.workspace_name])
-    args.add([ctx.label.package])
-    args.add([input.path])
+    args.add("--binDir", ctx.bin_dir.path)
+    args.add("--workspace", ctx.workspace_name)
+    args.add("--package", ctx.label.package)
+    args.add("--input", input)
 
     ctx.actions.run(
         inputs = [input],
@@ -148,6 +146,17 @@ def _wrap_amd(ctx, input):
         progress_message = "Wrapping generated PB files in AMD",
         executable = ctx.executable._wrap_amd,
         arguments = [args]
+    )
+
+    return output
+
+def _copy_file(ctx, input):
+    output = ctx.actions.declare_file(input.basename)
+
+    ctx.actions.expand_template(
+        template = input,
+        output = output,
+        substitutions = {}
     )
 
     return output
