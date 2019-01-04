@@ -97,6 +97,7 @@ def run_webpack(ctx, actions, executable, label, sources, output_dir, config):
     webpack_args = actions.args()
     webpack_args.add(["--config", config])
     webpack_args.add(["--silent"])
+    webpack_args.add(["--bail"])
 
     direct_inputs = [config]
     for d in ctx.attr.deps:
