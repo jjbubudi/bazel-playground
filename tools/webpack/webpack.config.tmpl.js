@@ -4,16 +4,17 @@ const webpack = require("webpack");
 
 const nodeModulesRoot = TMPL_node_modules_root;
 const moduleMappings = TMPL_module_mappings;
+const alias = TMPL_alias;
 const workspaceName = "TMPL_workspace_name";
 const rootDir = "TMPL_root_dir";
 const fullPath = path.parse(path.join(process.cwd(), "TMPL_output"));
 
-for (const k in moduleMappings) {
-  const v = moduleMappings[k].replace(/\.d\.ts$/, "");
-  const pp = path.resolve(path.join(rootDir, v));
-  moduleMappings[k] = pp;
+const allAliases = {...moduleMappings, ...alias};
+for (const moduleName in allAliases) {
+  const relativePath = allAliases[moduleName].replace(/\.d\.ts$/, "");
+  allAliases[moduleName] = path.resolve(path.join(rootDir, relativePath));
 }
-moduleMappings[workspaceName] = path.resolve(rootDir);
+allAliases[workspaceName] = path.resolve(rootDir);
 
 module.exports = {
   mode: "TMPL_mode",
@@ -24,7 +25,7 @@ module.exports = {
     hints: false
   },
   resolve: {
-    alias: moduleMappings,
+    alias: allAliases,
     modules: nodeModulesRoot
   },
   module: {
@@ -50,6 +51,7 @@ module.exports = {
         cache: true,
         terserOptions: {
           compress: {
+            pure_getters: true,
             keep_fargs: false,
             passes: 3
           },

@@ -77,6 +77,7 @@ def write_config(ctx, label, template, output_dir, entry_point, root_dir = None)
             "TMPL_root_dir": "/".join([".", root_dir]),
             "TMPL_workspace_name": ctx.workspace_name,
             "TMPL_module_mappings": str(mappings),
+            "TMPL_alias": str(ctx.attr.alias),
             "TMPL_node_modules_root": str([] if not node_modules_root else [node_modules_root]),
             "TMPL_name": label.name,
             "TMPL_output": output_dir.path,
@@ -137,6 +138,11 @@ webpack_bundle = rule(
         "deps": attr.label_list(
             doc = "Other targets that produce JavaScript, e.g. `ts_library`",
             aspects = [webpack_module_mappings_aspect, collect_node_modules_aspect]),
+        "alias": attr.string_dict(
+            doc = """A dict of alias, for overriding require calls.
+            The key should be the module name to override.
+            The value should be a path relative to the workspace root.""",
+            default = {}),
         "entry_point": attr.string(
             doc = "Entry point JS file, relative to the workspace root",
             mandatory = True),

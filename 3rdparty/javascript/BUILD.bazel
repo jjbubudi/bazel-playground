@@ -1,0 +1,13 @@
+exports_files([
+    "google-protobuf.js"
+])
+
+genrule(
+    name = "google_protobuf_umd",
+    srcs = ["google-protobuf.js"],
+    outs = ["google-protobuf.umd.js"],
+    cmd = """echo "define('google-protobuf', function(require, exports, module) {" > $@ \
+             && cat $< >> $@ \
+             && echo '});' >> $@""",
+    visibility = ["//visibility:public"]
+)

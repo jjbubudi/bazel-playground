@@ -54,7 +54,7 @@ ts_devserver(
         "favicon.ico",
     ],
     deps = [
-        "//:google_protobuf_umd",
+        "//3rdparty/javascript:google_protobuf_umd",
         ":app"
     ],
 )
@@ -93,7 +93,7 @@ ts_web_test_suite(
         "@npm//node_modules/browser-headers:dist/browser-headers.umd.js",
     ],
     deps = [
-        "//:google_protobuf_umd",
+        "//3rdparty/javascript:google_protobuf_umd",
         ":test_lib",
     ],
 )
@@ -101,6 +101,10 @@ ts_web_test_suite(
 webpack_bundle(
     name = "bundle",
     entry_point = "web/src/main",
+    alias = {
+        "google-protobuf": "3rdparty/javascript/google-protobuf"
+    },
+    srcs = ["//3rdparty/javascript:google-protobuf.js"],
     deps = [
         "//web/src:app",
         "@npm//@ngrx/store",
