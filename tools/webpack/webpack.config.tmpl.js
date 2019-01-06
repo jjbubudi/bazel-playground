@@ -28,17 +28,7 @@ module.exports = {
     alias: allAliases,
     modules: nodeModulesRoot
   },
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        loader: require.resolve("@angular-devkit/build-optimizer/webpack-loader"),
-        options: {
-          sourceMap: false
-        }
-      }
-    ]
-  },
+  module: {},
   plugins: [
     new webpack.DefinePlugin({
       "ngDevMode": false,
@@ -63,7 +53,13 @@ module.exports = {
       }),
     ]
   },
-  node: false,
+  node: {
+    dgram: "empty",
+    fs: "empty",
+    net: "empty",
+    tls: "empty",
+    child_process: "empty"
+  },
   output: {
     path: fullPath.dir,
     filename: fullPath.base
