@@ -6,6 +6,7 @@ load("//tools/webpack:webpack_bundle.bzl", "webpack_bundle")
 _ROOT_PATHS = [
     "npm/node_modules/react/umd",
     "npm/node_modules/react-dom/umd",
+    "npm/node_modules/react-router-dom/umd",
     "npm/node_modules/@material-ui/core/umd"
 ]
 
@@ -16,6 +17,7 @@ ts_library(
     deps = [
         "@npm//react",
         "@npm//react-dom",
+        "@npm//react-router-dom",
         "@npm//@material-ui/core",
         "@npm//@types",
         "//api_proto:hello_ts_proto"
@@ -36,6 +38,7 @@ ts_devserver(
     data = [
         "@npm//node_modules/react:umd/react.development.js",
         "@npm//node_modules/react-dom:umd/react-dom.development.js",
+        "@npm//node_modules/react-router-dom:umd/react-router-dom.js",
         "@npm//node_modules/@material-ui/core:umd/material-ui.development.js"
     ],
     deps = [
@@ -50,6 +53,7 @@ webpack_bundle(
         "//todo:app",
         "@npm//react",
         "@npm//react-dom",
+        "@npm//react-router-dom",
         "@npm//@material-ui/core"
     ]
 )
