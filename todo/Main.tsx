@@ -1,13 +1,13 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Button } from "@material-ui/core";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Button } from "./Button";
 
 const Index = () => <h2>Home</h2>;
 const About = () => <h2>About</h2>;
-const Users = () => <h2><Button variant="contained" color="primary">Hello World</Button></h2>;
+const Users = () => <Button>Hello World</Button>;
 
-const AppRouter = () => (
+const Main = () => (
   <Router>
     <div>
       <nav>
@@ -31,6 +31,6 @@ const AppRouter = () => (
 );
 
 ReactDOM.render(
-  <AppRouter />,
+  <Main />,
   document.getElementById("root")
 );

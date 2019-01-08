@@ -1,0 +1,29 @@
+load("@build_bazel_rules_typescript//:defs.bzl", "ts_devserver")
+
+_ROOT_PATHS = [
+    "npm/node_modules/react/umd",
+    "npm/node_modules/react-dom/umd",
+    "npm/node_modules/react-router-dom/umd",
+    "npm/node_modules/styled-components/dist",
+    "mono_repo/todo/devserver"
+]
+
+ts_devserver(
+    name = "devserver",
+    port = 4200,
+    additional_root_paths = _ROOT_PATHS,
+    entry_module = "mono_repo/todo/Main",
+    index_html = "//todo:index.html",
+    scripts = [
+        ":require.config.js",
+        "@npm//node_modules/tslib:tslib.js",
+    ],
+    data = [
+        "@npm//node_modules/react:umd/react.development.js",
+        "@npm//node_modules/react-dom:umd/react-dom.development.js",
+        "@npm//node_modules/react-router-dom:umd/react-router-dom.js",
+        "@npm//node_modules/styled-components:dist/styled-components.js",
+        "//todo/devserver:export-styled-components.js",
+    ],
+    deps = ["//todo:app"],
+)

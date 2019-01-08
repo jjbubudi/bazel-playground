@@ -3,68 +3,40 @@ load("@build_bazel_rules_nodejs//:defs.bzl", "history_server")
 load("@build_bazel_rules_nodejs//internal/web_package:web_package.bzl", "web_package")
 load("//tools/webpack:webpack_bundle.bzl", "webpack_bundle")
 
-_ROOT_PATHS = [
-    "npm/node_modules/react/umd",
-    "npm/node_modules/react-dom/umd",
-    "npm/node_modules/react-router-dom/umd",
-    "npm/node_modules/@material-ui/core/umd"
-]
+exports_files([
+    "index.html"
+])
 
 ts_library(
     name = "app",
-    srcs = ["App.tsx"],
+    srcs = glob(["*.ts", "*.tsx"]),
     tsconfig = "//:tsconfig.json",
     deps = [
+        "@npm//@types",
         "@npm//react",
         "@npm//react-dom",
         "@npm//react-router-dom",
-        "@npm//@material-ui/core",
-        "@npm//@types",
-        "//api_proto:hello_ts_proto"
+        "//todo/theme"
     ],
     visibility = ["//visibility:public"]
 )
 
-ts_devserver(
-    name = "devserver",
-    port = 4200,
-    additional_root_paths = _ROOT_PATHS,
-    entry_module = "mono_repo/todo/App",
-    index_html = "index.html",
-    scripts = [
-        ":require.config.js",
-        "@npm//node_modules/tslib:tslib.js",
-    ],
-    data = [
-        "@npm//node_modules/react:umd/react.development.js",
-        "@npm//node_modules/react-dom:umd/react-dom.development.js",
-        "@npm//node_modules/react-router-dom:umd/react-router-dom.js",
-        "@npm//node_modules/@material-ui/core:umd/material-ui.development.js"
-    ],
-    deps = [
-        ":app"
-    ],
-)
-
 webpack_bundle(
     name = "bundle",
-    entry_point = "todo/App",
+    entry_point = "todo/Main",
     deps = [
         "//todo:app",
         "@npm//react",
         "@npm//react-dom",
         "@npm//react-router-dom",
-        "@npm//@material-ui/core"
+        "@npm//styled-components",
     ]
 )
 
 web_package(
     name = "prodapp",
-    additional_root_paths = _ROOT_PATHS,
     # Do not sort
-    assets = [
-        ":bundle.min.js"
-    ],
+    assets = [":bundle.min.js"],
     data = [":bundle"],
     index_html = "index.html"
 )
