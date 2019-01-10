@@ -5,8 +5,7 @@ ts_library(
     srcs = glob(["*.ts", "*.tsx"]),
     tsconfig = "//:tsconfig.json",
     deps = [
-        "@npm//styled-components",
-        "@npm//@types"
+        "@npm//@types/styled-components"
     ],
     visibility = ["//visibility:public"]
 )

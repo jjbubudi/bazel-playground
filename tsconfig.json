@@ -15,6 +15,7 @@
     "paths": {
       "mono_repo/*": ["dist/bin/*"]
     },
+    "types": []
   },
   "bazelOptions": {
     "suppressTsconfigOverrideWarnings": true

@@ -12,7 +12,6 @@ _ROOT_PATHS = [
     "npm/node_modules/systemjs/dist",
     "npm/node_modules/@ngrx/store/bundles",
     "npm/node_modules/grpc-web-client/dist",
-    "npm/node_modules/browser-headers/dist",
 ]
 
 ng_module(
@@ -26,7 +25,6 @@ ng_module(
     deps = [
         "@angular//packages/core",
         "@angular//packages/platform-browser",
-        "@npm//@types",
         "@npm//@ngrx/store",
         "@npm//grpc-web-client",
         "//api_proto:hello_ts_proto",
@@ -46,7 +44,6 @@ ts_devserver(
     data = [
         "@npm//node_modules/@ngrx/store:bundles/store.umd.js",
         "@npm//node_modules/grpc-web-client:dist/grpc-web-client.umd.js",
-        "@npm//node_modules/browser-headers:dist/browser-headers.umd.js",
     ],
     static_files = [
         "@npm//node_modules/zone.js:dist/zone.min.js",
@@ -67,7 +64,6 @@ ts_library(
         ":app",
         "@angular//packages/core/testing",
         "@angular//packages/platform-browser-dynamic/testing",
-        "@npm//@types",
     ],
 )
 
@@ -90,7 +86,6 @@ ts_web_test_suite(
     ],
     static_files = [
         "@npm//node_modules/grpc-web-client:dist/grpc-web-client.umd.js",
-        "@npm//node_modules/browser-headers:dist/browser-headers.umd.js",
     ],
     deps = [
         "//3rdparty/javascript:google_protobuf_umd",
