@@ -55,7 +55,7 @@ def write_config(ctx, label, template, output_dir, entry_point, root_dir = None)
         if hasattr(dep, _WEBPACK_MODULE_MAPPINGS_ATTR):
             for k, v in getattr(dep, _WEBPACK_MODULE_MAPPINGS_ATTR).items():
                 if k in mappings and mappings[k] != v:
-                    fail(("duplicate module mapping at %s: %s maps to both %s and %s" % 
+                    fail(("duplicate module mapping at %s: %s maps to both %s and %s" %
                         (dep.label, k, mappings[k], v)), "deps")
                 mappings[k] = v
 

@@ -9,7 +9,7 @@ const workspaceName = "TMPL_workspace_name";
 const rootDir = "TMPL_root_dir";
 const fullPath = path.parse(path.join(process.cwd(), "TMPL_output"));
 
-const allAliases = {...moduleMappings, ...alias};
+const allAliases = { ...moduleMappings, ...alias };
 for (const moduleName in allAliases) {
   const relativePath = allAliases[moduleName].replace(/\.d\.ts$/, "");
   allAliases[moduleName] = path.resolve(path.join(rootDir, relativePath));
@@ -28,7 +28,21 @@ module.exports = {
     alias: allAliases,
     modules: nodeModulesRoot
   },
-  module: {},
+  module: {
+    rules: [
+      {
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: require.resolve("babel-loader"),
+          options: {
+            presets: [[require.resolve("@babel/preset-env"), { modules: false }]],
+            cacheDirectory: true
+          }
+        }
+      }
+    ]
+  },
   plugins: [
     new webpack.DefinePlugin({
       "ngDevMode": false,
