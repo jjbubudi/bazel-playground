@@ -9,6 +9,6 @@ describe('workspace-project App', () => {
 
   it('should display welcome message', () => {
     page.navigateTo();
-    expect(page.getTitleText()).not.toBe("");
+    expect(page.getTitleText()).not.toBeUndefined();
   });
 });

@@ -13,21 +13,21 @@ export class AppComponent {
   title: String = 'web';
 
   constructor() {
-    const client = new HelloServiceClient("http://localhost:8081");
+    const client = new HelloServiceClient('http://localhost:8081');
 
     client.sayHello(new HelloRequest(), (_, response) => {
-      response
-        ? this.title = response.getMessage()
-        : null;
+      if (response) {
+        this.title = response.getMessage();
+      }
     });
 
     client
       .sayBye(new Bye())
-      .on("data", (reply) => {
+      .on('data', (reply) => {
         this.title = reply.getMessage();
       })
-      .on("end", () => {
-        this.title = "Done!";
+      .on('end', () => {
+        this.title = 'Done!';
       });
   }
 }

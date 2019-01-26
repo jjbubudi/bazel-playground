@@ -1,4 +1,4 @@
-import styled from "./theme";
+import styled from './theme';
 
 export const Button = styled.button`
   background: "palevioletred";
