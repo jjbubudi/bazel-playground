@@ -1,0 +1,4 @@
+// Placeholder config for editors
+{
+  "extends": "../tsconfig-test.json"
+}
