@@ -1,4 +1,5 @@
 exports_files([
     "tsconfig.json",
-    "tsconfig-test.json"
+    "tsconfig-test.json",
+    "tsconfig-e2e.json"
 ])

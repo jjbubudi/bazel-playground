@@ -1,13 +1,8 @@
 {
-    "extends": "./tsconfig.json",
-    "compilerOptions": {
-      "types": [
-        "jasmine",
-        "jasminewd2",
-        "node"
-      ]
-    },
-    "bazelOptions": {
-      "suppressTsconfigOverrideWarnings": true
-    }
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "jasmine"
+    ]
   }
+}

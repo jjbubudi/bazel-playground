@@ -8,8 +8,6 @@ ts_library(
     tsconfig = "//:tsconfig-test.json",
     deps = [
       "@npm//@types/jasmine",
-      "@npm//@types/jasminewd2",
-      "@npm//@types/node",
       "@npm//jasmine",
       "@npm//protractor",
     ]

@@ -62,9 +62,11 @@ ts_library(
     srcs = glob(["**/*.spec.ts"]),
     deps = [
         ":app",
+        "@npm//@types/jasmine",
         "@angular//packages/core/testing",
         "@angular//packages/platform-browser-dynamic/testing",
     ],
+    tsconfig = "//:tsconfig-test.json"
 )
 
 ts_web_test_suite(
