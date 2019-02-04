@@ -1,3 +1,5 @@
+import { Long } from '../language/types';
+
 const DIGITS = [
   '0', '1', '2', '3', '4', '5', '6', '7',
   '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
@@ -5,7 +7,7 @@ const DIGITS = [
 const TWO_TO_32 = 0x100000000;
 const MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
 
-export class UInt64 {
+export class UInt64 implements Long {
 
   static readonly ZERO: UInt64 = UInt64.fromNumber(0);
 
@@ -127,7 +129,7 @@ export class UInt64 {
   }
 }
 
-export class Int64 {
+export class Int64 implements Long {
 
   readonly low: number;
   readonly high: number;

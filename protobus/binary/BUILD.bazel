@@ -2,23 +2,21 @@ load("@build_bazel_rules_typescript//:defs.bzl", "ts_library")
 load("@build_bazel_rules_nodejs//:defs.bzl", "jasmine_node_test")
 
 ts_library(
-    name = "protobus",
+    name = "binary",
     srcs = glob(["*.ts"], exclude = ["*.spec.ts"]),
     deps = [
-        "//protobus/language",
-        "//protobus/binary"
+        "//protobus/language"
     ],
     tsconfig = "//:tsconfig.json",
     visibility = ["//visibility:public"]
 )
 
 ts_library(
-    name = "protobus_test",
+    name = "binary_test",
     testonly = 1,
     srcs = glob(["*.spec.ts"]),
     deps = [
-        ":protobus",
-        "//protobus/binary",
+        ":binary",
         "@npm//@types/jasmine"
     ],
     tsconfig = "//:tsconfig-test.json"
@@ -28,6 +26,6 @@ jasmine_node_test(
     name = "test",
     deps = [
         "@npm//jasmine",
-        ":protobus_test"
+        ":binary_test"
     ]
 )
