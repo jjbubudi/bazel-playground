@@ -35,5 +35,11 @@ export type ProtobufTypes =
   | boolean
   | string
   | Bytes
+  | OneofCase<any, any>
   | { [index: number]: ProtobufTypes }
   | { [field: string]: ProtobufTypes };
+
+export interface OneofCase<T, R extends ProtobufTypes> {
+  readonly type: T;
+  readonly value: R;
+}
