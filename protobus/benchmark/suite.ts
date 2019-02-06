@@ -1,5 +1,5 @@
 import * as Benchmark from 'benchmark';
-import { int32Field, booleanField, stringField, uint32Field } from '../binary/integral';
+import { int32Field, booleanField, uint32Field } from '../binary/integral';
 import { repeated } from '../binary/repeated';
 import { protobufSchema } from '../protobus';
 
@@ -21,14 +21,14 @@ const Inner = protobufSchema({
 });
 
 const Test = protobufSchema({
-  string: stringField(1),
+  // string: stringField(1),
   uint32: uint32Field(2),
   inner: Inner.field(3),
   float: int32Field(4)
 });
 
 const testBytes = new Uint8Array([
-  1, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01, // string
+  // 1, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01, // string
 
   2, 0x96, 0x01, // uint32
 

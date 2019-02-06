@@ -25,7 +25,9 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
         if (!schema.hasOwnProperty(k)) {
           continue;
         }
-        fields[schema[k].tag] = schema[k].decode;
+        for (let i = 0; i < schema[k].tag.length; i++) {
+          fields[schema[k].tag[i]] = schema[k].decode;
+        }
       }
       return fields;
     })();
@@ -35,7 +37,9 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
         if (!schema.hasOwnProperty(k)) {
           continue;
         }
-        tagToKey[schema[k].tag] = k;
+        for (let i = 0; i < schema[k].tag.length; i++) {
+          tagToKey[schema[k].tag[i]] = k;
+        }
       }
       return tagToKey;
     })();
@@ -44,7 +48,7 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
   field(tag: number): Field<ObjectType<S>> {
     const decode = this.decodeDelimited.bind(this);
     return new Field(
-      tag,
+      [tag],
       (data) => [0],
       decode
     );
@@ -54,7 +58,7 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
     return new Uint8Array(0);
   }
 
-  decodeDelimited(offset: number, b: Readonly<Uint8Array>): Decoded<ObjectType<S>> {
+  decodeDelimited(tag: number, offset: number, b: Readonly<Uint8Array>): Decoded<ObjectType<S>> {
     const finalObject: { [index: string]: any } = {};
     const isDelimited = offset > 0;
 
@@ -62,7 +66,7 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
     let sizeLength: number;
 
     if (isDelimited) {
-      const d = decodeUint32(offset, b);
+      const d = decodeUint32(0, offset, b);
       messageLength = d[0];
       sizeLength = d[1];
     } else {
@@ -74,9 +78,9 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
     let cursor = offset + sizeLength;
 
     while (cursor < end) {
-      const [key, keyLength] = decodeUint32(cursor, b);
+      const [key, keyLength] = decodeUint32(0, cursor, b);
       const decoder = this.tagToDecoder[key];
-      const [data, numberOfBytes] = decoder(cursor + keyLength, b);
+      const [data, numberOfBytes] = decoder(key, cursor + keyLength, b);
       finalObject[this.tagToKey[key]] = data;
       cursor += numberOfBytes + keyLength;
     }
@@ -85,6 +89,6 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
   }
 
   decode(b: Readonly<Uint8Array>): ObjectType<S> {
-    return this.decodeDelimited(0, b)[0];
+    return this.decodeDelimited(0, 0, b)[0];
   }
 }

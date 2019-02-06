@@ -6,13 +6,13 @@ export function repeated<T extends ProtobufTypes>(field: Field<T>): Field<T[]> {
   return new Field<T[]>(
     field.tag,
     (data) => [0],
-    (offset, bytes) => {
+    (tag, offset, bytes) => {
       const size = bytes[offset];
       const results = [];
       let cursor = 0;
 
       while (cursor < size) {
-        const [data, length] = decode(cursor + offset + 1, bytes);
+        const [data, length] = decode(tag, cursor + offset + 1, bytes);
         results.push(data);
         cursor += length;
       }
