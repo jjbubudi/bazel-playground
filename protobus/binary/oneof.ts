@@ -26,7 +26,7 @@ export function oneof<S extends Schema>(schema: S): Field<Oneof<S>> {
     decode: (tag, offset, bytes) => {
       const [value, length] = tagToDecoder[tag](tag, offset, bytes);
       return [{
-        type: tagToKey[tag],
+        $case: tagToKey[tag],
         value: value
       } as Oneof<S>, length];
     }

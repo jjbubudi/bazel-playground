@@ -40,6 +40,6 @@ export type ProtobufTypes =
   | { [field: string]: ProtobufTypes };
 
 export interface OneofCase<T, R extends ProtobufTypes> {
-  readonly type: T;
+  readonly $case: T;
   readonly value: R;
 }
