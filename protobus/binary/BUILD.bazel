@@ -17,6 +17,7 @@ ts_library(
     srcs = glob(["*.spec.ts"]),
     deps = [
         ":binary",
+        "//protobus/language",
         "@npm//@types/jasmine"
     ],
     tsconfig = "//:tsconfig-test.json"
