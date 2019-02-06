@@ -3,10 +3,10 @@ import { Field } from '../language/schema';
 
 export function repeated<T extends ProtobufTypes>(field: Field<T>): Field<T[]> {
   const decode = field.decode;
-  return new Field<T[]>(
-    field.tag,
-    (data) => [0],
-    (tag, offset, bytes) => {
+  return {
+    tag: field.tag,
+    encode: (data) => [0],
+    decode: (tag, offset, bytes) => {
       const size = bytes[offset];
       const results = [];
       let cursor = 0;
@@ -19,5 +19,5 @@ export function repeated<T extends ProtobufTypes>(field: Field<T>): Field<T[]> {
 
       return [results, size + 1];
     }
-  );
+  };
 }

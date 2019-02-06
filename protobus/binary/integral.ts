@@ -25,19 +25,19 @@ export function decodeUint32(tag: number, offset: number, bytes: Readonly<Uint8A
 }
 
 export function uint32Field(tag: number): Field<Uint32> {
-  return new Field<Uint32>(
-    [tag],
-    (data) => [0],
-    decodeUint32
-  );
+  return {
+    tag: [tag],
+    encode: (data) => [0],
+    decode: decodeUint32
+  };
 }
 
 export function int32Field(tag: number): Field<Int32> {
-  return new Field<Int32>(
-    [tag],
-    (data) => [0],
-    decodeInt32
-  );
+  return {
+    tag: [tag],
+    encode: (data) => [0],
+    decode: decodeInt32
+  };
 }
 
 export function decodeBoolean(tag: number, offset: number, bytes: Readonly<Uint8Array>): Decoded<boolean> {
@@ -46,9 +46,9 @@ export function decodeBoolean(tag: number, offset: number, bytes: Readonly<Uint8
 }
 
 export function booleanField(tag: number): Field<boolean> {
-  return new Field<boolean>(
-    [tag],
-    (data) => [0],
-    decodeBoolean
-  );
+  return {
+    tag: [tag],
+    encode: (data) => [0],
+    decode: decodeBoolean
+  };
 }

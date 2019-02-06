@@ -19,39 +19,30 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
   private readonly tagToKey: Readonly<{ [tag: number]: string }>;
 
   constructor(schema: S) {
-    this.tagToDecoder = (() => {
-      const fields: { [index: number]: Decoder<any> } = {};
-      for (const k in schema) {
-        if (!schema.hasOwnProperty(k)) {
-          continue;
-        }
-        for (let i = 0; i < schema[k].tag.length; i++) {
-          fields[schema[k].tag[i]] = schema[k].decode;
-        }
+    const tagToDecoder: { [tag: number]: Decoder<any> } = {};
+    const tagToKey: { [tag: number]: string } = {};
+
+    for (const k in schema) {
+      if (!schema.hasOwnProperty(k)) {
+        continue;
       }
-      return fields;
-    })();
-    this.tagToKey = (() => {
-      const tagToKey: { [index: number]: string } = {};
-      for (const k in schema) {
-        if (!schema.hasOwnProperty(k)) {
-          continue;
-        }
-        for (let i = 0; i < schema[k].tag.length; i++) {
-          tagToKey[schema[k].tag[i]] = k;
-        }
+      for (let i = 0; i < schema[k].tag.length; i++) {
+        tagToKey[schema[k].tag[i]] = k;
+        tagToDecoder[schema[k].tag[i]] = schema[k].decode;
       }
-      return tagToKey;
-    })();
+    }
+
+    this.tagToDecoder = tagToDecoder;
+    this.tagToKey = tagToKey;
   }
 
   field(tag: number): Field<ObjectType<S>> {
     const decode = this.decodeDelimited.bind(this);
-    return new Field(
-      [tag],
-      (data) => [0],
-      decode
-    );
+    return {
+      tag: [tag],
+      encode: (data) => [0],
+      decode: decode
+    };
   }
 
   encode(o: ObjectType<S>): Uint8Array {
