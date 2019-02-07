@@ -1,11 +1,5 @@
 import { Int32, Uint32 } from '../language/types';
-import { Field, Decoded, Encoded } from '../language/schema';
-
-export function decodeInt32(tag: number, offset: number, bytes: Readonly<Uint8Array>): Decoded<Int32> {
-  const result = decodeUint32(tag, offset, bytes);
-  result[0] = result[0] | 0;
-  return result;
-}
+import { Field, Decoded } from '../language/schema';
 
 export function encodeUint32(value: number): number[] {
   const bytes = [];
@@ -17,7 +11,7 @@ export function encodeUint32(value: number): number[] {
   return bytes;
 }
 
-export function decodeUint32(tag: number, offset: number, bytes: Readonly<Uint8Array>): Decoded<Uint32> {
+export function decodeUint32(offset: number, bytes: Readonly<Uint8Array>): Decoded<Uint32> {
   let pos = offset;
   let result = 0;
   let shift = 0;
@@ -38,7 +32,7 @@ export function uint32Field(tag: number): Field<Uint32> {
   return {
     tag: [tag],
     encode: (data) => [tag, 0, ...encodeUint32(data)],
-    decode: decodeUint32
+    decode: (_, offset, bytes) => decodeUint32(offset, bytes)
   };
 }
 
@@ -46,19 +40,18 @@ export function int32Field(tag: number): Field<Int32> {
   return {
     tag: [tag],
     encode: (data) => [0],
-    decode: decodeInt32
+    decode: (_, offset, bytes) => {
+      const result = decodeUint32(offset, bytes);
+      result[0] = result[0] | 0;
+      return result;
+    }
   };
-}
-
-export function decodeBoolean(tag: number, offset: number, bytes: Readonly<Uint8Array>): Decoded<boolean> {
-  const result = decodeUint32(tag, offset, bytes)[0] === 1 ? true : false;
-  return [result, 1];
 }
 
 export function booleanField(tag: number): Field<boolean> {
   return {
     tag: [tag],
-    encode: (data) => [0],
-    decode: decodeBoolean
+    encode: (data) => [tag, 0, data ? 1 : 0],
+    decode: (_, offset, bytes) => [!!decodeUint32(offset, bytes)[0], 1]
   };
 }
