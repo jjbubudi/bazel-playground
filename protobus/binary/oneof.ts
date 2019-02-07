@@ -5,28 +5,28 @@ export type UnionizeProperties<T extends object> = T[keyof T];
 export type Oneof<S extends Schema> = UnionizeProperties<{ [K in keyof S]: OneofCase<K, FieldType<S[K]>> }>;
 
 export function oneof<S extends Schema>(schema: S): Field<Oneof<S>> {
-  const tagToDecoder: { [tag: number]: Decoder<any> } = {};
-  const tagToKey: { [tag: number]: string } = {};
-  const tags: number[] = [];
+  const fieldNumberToDecoder: { [fieldNumber: number]: Decoder<any> } = {};
+  const fieldNumberToKey: { [fieldNumber: number]: string } = {};
+  const fieldNumbers: number[] = [];
 
   for (const k in schema) {
     if (!schema.hasOwnProperty(k)) {
       continue;
     }
-    tags.push(...schema[k].tag);
-    for (let i = 0; i < schema[k].tag.length; i++) {
-      tagToKey[schema[k].tag[i]] = k;
-      tagToDecoder[schema[k].tag[i]] = schema[k].decode;
+    fieldNumbers.push(...schema[k].fieldNumbers);
+    for (let i = 0; i < schema[k].fieldNumbers.length; i++) {
+      fieldNumberToKey[schema[k].fieldNumbers[i]] = k;
+      fieldNumberToDecoder[schema[k].fieldNumbers[i]] = schema[k].decode;
     }
   }
 
   return {
-    tag: tags,
+    fieldNumbers: fieldNumbers,
     encode: (data) => [0],
-    decode: (tag, offset, bytes) => {
-      const [value, length] = tagToDecoder[tag](tag, offset, bytes);
+    decode: (fieldNumber, offset, bytes) => {
+      const [value, length] = fieldNumberToDecoder[fieldNumber](fieldNumber, offset, bytes);
       return [{
-        $case: tagToKey[tag],
+        $case: fieldNumberToKey[fieldNumber],
         value: value
       } as Oneof<S>, length];
     }

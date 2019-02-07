@@ -4,15 +4,15 @@ import { Field } from '../language/schema';
 export function repeated<T extends ProtobufTypes>(field: Field<T>): Field<T[]> {
   const decode = field.decode;
   return {
-    tag: field.tag,
+    fieldNumbers: field.fieldNumbers,
     encode: (data) => [0],
-    decode: (tag, offset, bytes) => {
+    decode: (fieldNumber, offset, bytes) => {
       const size = bytes[offset];
       const results = [];
       let cursor = 0;
 
       while (cursor < size) {
-        const [data, length] = decode(tag, cursor + offset + 1, bytes);
+        const [data, length] = decode(fieldNumber, cursor + offset + 1, bytes);
         results.push(data);
         cursor += length;
       }

@@ -5,10 +5,10 @@ export type Encoder<T extends ProtobufTypes> = (data: T) => Encoded;
 
 export type Decoded<T extends ProtobufTypes> = [T, number];
 export type Decoder<T extends ProtobufTypes> =
-  (tag: number, offset: number, bytes: Readonly<Uint8Array>) => Decoded<T>;
+  (fieldNumber: number, offset: number, bytes: Readonly<Uint8Array>) => Decoded<T>;
 
 export interface Field<T extends ProtobufTypes> {
-  readonly tag: number[];
+  readonly fieldNumbers: number[];
   readonly encode: Encoder<T>;
   readonly decode: Decoder<T>;
 }

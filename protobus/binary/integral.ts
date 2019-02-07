@@ -28,17 +28,17 @@ export function decodeUint32(offset: number, bytes: Readonly<Uint8Array>): Decod
   return [result >>> 0, numberOfBytes];
 }
 
-export function uint32Field(tag: number): Field<Uint32> {
+export function uint32Field(fieldNumber: number): Field<Uint32> {
   return {
-    tag: [tag],
-    encode: (data) => [tag, WireType.Varint, ...encodeUint32(data)],
+    fieldNumbers: [fieldNumber],
+    encode: (data) => [fieldNumber, WireType.Varint, ...encodeUint32(data)],
     decode: (_, offset, bytes) => decodeUint32(offset, bytes)
   };
 }
 
-export function int32Field(tag: number): Field<Int32> {
+export function int32Field(fieldNumber: number): Field<Int32> {
   return {
-    tag: [tag],
+    fieldNumbers: [fieldNumber],
     encode: (data) => [0],
     decode: (_, offset, bytes) => {
       const result = decodeUint32(offset, bytes);
@@ -48,10 +48,10 @@ export function int32Field(tag: number): Field<Int32> {
   };
 }
 
-export function booleanField(tag: number): Field<boolean> {
+export function booleanField(fieldNumber: number): Field<boolean> {
   return {
-    tag: [tag],
-    encode: (data) => [tag, WireType.Varint, data ? 1 : 0],
+    fieldNumbers: [fieldNumber],
+    encode: (data) => [fieldNumber, WireType.Varint, data ? 1 : 0],
     decode: (_, offset, bytes) => [!!decodeUint32(offset, bytes)[0], 1]
   };
 }
