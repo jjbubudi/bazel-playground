@@ -1,5 +1,5 @@
-import { ObjectType, Decoded, Decoder, Field, Schema } from './language/schema';
-import { decodeUint32 } from './binary/integral';
+import { ObjectType, Decoded, Decoder, Field, Schema, Encoder } from './language/schema';
+import { decodeUint32, encodeUint32 } from './binary/integral';
 
 export type SchemaType<T extends CompiledSchema<any>> = T extends CompiledSchema<infer R> ? R : never;
 
@@ -17,10 +17,12 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
 
   private readonly tagToDecoder: Readonly<{ [tag: number]: Decoder<any> }>;
   private readonly tagToKey: Readonly<{ [tag: number]: string }>;
+  private readonly keyToEncoder: Readonly<{ [key: string]: Encoder<any> }>;
 
   constructor(schema: S) {
     const tagToDecoder: { [tag: number]: Decoder<any> } = {};
     const tagToKey: { [tag: number]: string } = {};
+    const keyToEncoder: { [key: string]: Encoder<any> } = {};
 
     for (const k in schema) {
       if (!schema.hasOwnProperty(k)) {
@@ -29,11 +31,13 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
       for (let i = 0; i < schema[k].tag.length; i++) {
         tagToKey[schema[k].tag[i]] = k;
         tagToDecoder[schema[k].tag[i]] = schema[k].decode;
+        keyToEncoder[k] = schema[k].encode;
       }
     }
 
     this.tagToDecoder = tagToDecoder;
     this.tagToKey = tagToKey;
+    this.keyToEncoder = keyToEncoder;
   }
 
   field(tag: number): Field<ObjectType<S>> {
@@ -46,7 +50,24 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
   }
 
   encode(o: ObjectType<S>): Uint8Array {
-    return new Uint8Array(0);
+    const encoded: number[] = [];
+    for (const k in o) {
+      if (!o.hasOwnProperty(k)) {
+        continue;
+      }
+      const [fieldNumber, wireType, ...data] = this.keyToEncoder[k](o[k]);
+      const tag = encodeUint32((fieldNumber << 3) | wireType);
+      encoded.push.apply(encoded, tag);
+      encoded.push.apply(encoded, data);
+    }
+
+    const length = encoded.length;
+    const bytes = new Uint8Array(length);
+    for (let i = 0; i < length; i++) {
+      bytes[i] = encoded[i];
+    }
+
+    return bytes;
   }
 
   decodeDelimited(tag: number, offset: number, b: Readonly<Uint8Array>): Decoded<ObjectType<S>> {

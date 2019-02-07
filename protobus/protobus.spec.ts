@@ -40,4 +40,11 @@ describe('Encode and Decode', () => {
       }
     });
   });
+
+  it('should encode', () => {
+    const Test = protobufSchema({
+      a: uint32Field(1)
+    });
+    expect(Test.encode({a: 150})).toEqual(new Uint8Array([0x08, 0x96, 0x01]));
+  });
 });

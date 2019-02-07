@@ -1,10 +1,20 @@
 import { Int32, Uint32 } from '../language/types';
-import { Field, Decoded } from '../language/schema';
+import { Field, Decoded, Encoded } from '../language/schema';
 
 export function decodeInt32(tag: number, offset: number, bytes: Readonly<Uint8Array>): Decoded<Int32> {
   const result = decodeUint32(tag, offset, bytes);
   result[0] = result[0] | 0;
   return result;
+}
+
+export function encodeUint32(value: number): number[] {
+  const bytes = [];
+  while (value > 127) {
+    bytes.push((value & 0x7f) | 0x80);
+    value = value >>> 7;
+  }
+  bytes.push(value);
+  return bytes;
 }
 
 export function decodeUint32(tag: number, offset: number, bytes: Readonly<Uint8Array>): Decoded<Uint32> {
@@ -27,7 +37,7 @@ export function decodeUint32(tag: number, offset: number, bytes: Readonly<Uint8A
 export function uint32Field(tag: number): Field<Uint32> {
   return {
     tag: [tag],
-    encode: (data) => [0],
+    encode: (data) => [tag, 0, ...encodeUint32(data)],
     decode: decodeUint32
   };
 }

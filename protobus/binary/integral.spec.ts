@@ -1,14 +1,15 @@
-import { decodeUint32, decodeBoolean } from './integral';
+import { decodeUint32, decodeBoolean, encodeUint32 } from './integral';
 
 describe('Integral encode and decode', () => {
 
   describe('Uint32', () => {
     it('should decode varint into Uint32 and return its corresponding length', () => {
       [
-        { bytes: [0x05], value: 5, length: 1 },
-        { bytes: [0x96, 0x01], value: 150, length: 2 }
-      ].forEach(({ bytes, value, length }) => {
-        expect(decodeUint32(1, 0, new Uint8Array(bytes))).toEqual([value, length]);
+        { bytes: [0x05], value: 5 },
+        { bytes: [0x96, 0x01], value: 150 },
+        { bytes: [0xAC, 0x02], value: 300 }
+      ].forEach(({ bytes, value }) => {
+        expect(decodeUint32(1, 0, new Uint8Array(bytes))).toEqual([value, bytes.length]);
       });
     });
 
@@ -16,15 +17,26 @@ describe('Integral encode and decode', () => {
       const bytes = new Uint8Array([0x01, 0x01, 0x01, 0x05]);
       expect(decodeUint32(1, 3, bytes)).toEqual([5, 1]);
     });
+
+    it('should encode correctly', () => {
+      [
+        { number: 0, bytes: [0x00] },
+        { number: 8, bytes: [0x08] },
+        { number: 150, bytes: [0x96, 0x01] },
+        { number: 300, bytes: [0xAC, 0x02] }
+      ].forEach(({ number, bytes }) => {
+        expect(encodeUint32(number)).toEqual(bytes);
+      });
+    });
   });
 
   describe('Boolean', () => {
     it('should decode varint into Boolean and return its corresponding length', () => {
       [
-        { bytes: [0x01], value: true, length: 1 },
-        { bytes: [0x00], value: false, length: 1 }
-      ].forEach(({ bytes, value, length }) => {
-        expect(decodeBoolean(1, 0, new Uint8Array(bytes))).toEqual([value, length]);
+        { bytes: [0x01], value: true },
+        { bytes: [0x00], value: false }
+      ].forEach(({ bytes, value }) => {
+        expect(decodeBoolean(1, 0, new Uint8Array(bytes))).toEqual([value, 1]);
       });
     });
 
@@ -33,5 +45,4 @@ describe('Integral encode and decode', () => {
       expect(decodeBoolean(1, 2, bytes)).toEqual([true, 1]);
     });
   });
-
 });
