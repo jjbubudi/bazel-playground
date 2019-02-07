@@ -1,4 +1,4 @@
-import { Int32, Uint32 } from '../language/types';
+import { Int32, Uint32, WireType } from '../language/types';
 import { Field, Decoded } from '../language/schema';
 
 export function encodeUint32(value: number): number[] {
@@ -31,7 +31,7 @@ export function decodeUint32(offset: number, bytes: Readonly<Uint8Array>): Decod
 export function uint32Field(tag: number): Field<Uint32> {
   return {
     tag: [tag],
-    encode: (data) => [tag, 0, ...encodeUint32(data)],
+    encode: (data) => [tag, WireType.Varint, ...encodeUint32(data)],
     decode: (_, offset, bytes) => decodeUint32(offset, bytes)
   };
 }
@@ -51,7 +51,7 @@ export function int32Field(tag: number): Field<Int32> {
 export function booleanField(tag: number): Field<boolean> {
   return {
     tag: [tag],
-    encode: (data) => [tag, 0, data ? 1 : 0],
+    encode: (data) => [tag, WireType.Varint, data ? 1 : 0],
     decode: (_, offset, bytes) => [!!decodeUint32(offset, bytes)[0], 1]
   };
 }

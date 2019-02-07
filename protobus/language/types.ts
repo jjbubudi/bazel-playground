@@ -43,3 +43,12 @@ export interface OneofCase<T, R extends ProtobufTypes> {
   readonly $case: T;
   readonly value: R;
 }
+
+export enum WireType {
+  Varint = 0,
+  Fixed64 = 1,
+  Delimited = 2,
+  StartGroup = 3, // Deprecated in proto3, putting it here for completeness
+  EndGroup = 4, // Deprecated in proto3, putting it here for completeness
+  Fixed32 = 5
+}

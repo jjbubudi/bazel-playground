@@ -1,4 +1,5 @@
-import { decodeUint32, encodeUint32 } from './integral';
+import { decodeUint32, encodeUint32, booleanField } from './integral';
+import { WireType } from '../language/types';
 
 describe('Integral encode and decode', () => {
 
@@ -30,19 +31,26 @@ describe('Integral encode and decode', () => {
     });
   });
 
-  // describe('Boolean', () => {
-  //   it('should decode varint into Boolean and return its corresponding length', () => {
-  //     [
-  //       { bytes: [0x01], value: true },
-  //       { bytes: [0x00], value: false }
-  //     ].forEach(({ bytes, value }) => {
-  //       expect(decodeBoolean(0, new Uint8Array(bytes))).toEqual([value, 1]);
-  //     });
-  //   });
+  describe('Boolean', () => {
+    const fieldNumber = 1;
+    const field = booleanField(fieldNumber);
 
-  //   it('should start decoding from the given offset', () => {
-  //     const bytes = new Uint8Array([0x99, 0x99, 0x01]);
-  //     expect(decodeBoolean(2, bytes)).toEqual([true, 1]);
-  //   });
-  // });
+    it('should decode varint into boolean and return its corresponding length', () => {
+      [
+        { bytes: [0x08, 0x01], value: true },
+        { bytes: [0x08, 0x00], value: false }
+      ].forEach(({ bytes, value }) => {
+        expect(field.decode(fieldNumber, 1, new Uint8Array(bytes))).toEqual([value, 1]);
+      });
+    });
+
+    it('should encode boolean into varint', () => {
+      [
+        { value: true, bytes: [fieldNumber, WireType.Varint, 0x01] },
+        { value: false, bytes: [fieldNumber, WireType.Varint, 0x00] }
+      ].forEach(({ value, bytes }) => {
+        expect(field.encode(value)).toEqual(bytes);
+      });
+    });
+  });
 });
