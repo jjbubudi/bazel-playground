@@ -1,5 +1,6 @@
 import { protobufSchema } from './protobus';
 import { uint32Field, int32Field, booleanField } from './binary/integral';
+import { repeated } from './binary/repeated';
 
 describe('Encode and Decode', () => {
 
@@ -31,12 +32,32 @@ describe('Encode and Decode', () => {
     });
     const bytes = new Uint8Array([
       0x08, 0x00,
-      0x10, 0x03, 0x08, 0x96, 0x01
+      0x12, 0x03, 0x08, 0x96, 0x01
     ]);
     expect(Outer.decode(bytes)).toEqual({
       outside: false,
       inner: {
         inside: 150
+      }
+    });
+  });
+
+  it('should merge objects together if there are duplicate keys', () => {
+    const Inner = protobufSchema({
+      list: repeated(uint32Field(1))
+    });
+    const Test = protobufSchema({
+      inner: Inner.field(1)
+    });
+    const bytes = new Uint8Array([
+      0x0A, 0x05,
+        0x0A, 0x03, 0x01, 0x02, 0x03,
+      0x0A, 0x04,
+        0x0A, 0x02, 0x04, 0x05
+    ]);
+    expect(Test.decode(bytes)).toEqual({
+      inner: {
+        list: [1, 2, 3, 4, 5]
       }
     });
   });

@@ -49,7 +49,7 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
     return {
       fieldNumbers: [fieldNumber],
       encode: (data) => [0],
-      decode: (_, offset, bytes) => decode(offset, bytes)
+      decode: (_, offset, bytes, lastDecoded) => decode(offset, bytes, lastDecoded)
     };
   }
 
@@ -74,8 +74,8 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
     return bytes;
   }
 
-  decodeDelimited(offset: number, bytes: Readonly<Uint8Array>): Decoded<ObjectType<S>> {
-    const finalObject: { [index: string]: any } = {};
+  decodeDelimited(offset: number, bytes: Readonly<Uint8Array>, lastDecoded?: ObjectType<S>): Decoded<ObjectType<S>> {
+    const finalObject: { [index: string]: any } = lastDecoded !== undefined ? { ...lastDecoded as object } : {};
     const isDelimited = offset > 0;
 
     let messageLength: number;
@@ -97,8 +97,10 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
       const [tag, tagLength] = decodeUint32(cursor, bytes);
       const fieldNumber = tag >>> 3;
       const decoder = this.fieldNumberToDecoder[fieldNumber];
-      const [data, dataLength] = decoder(fieldNumber, cursor + tagLength, bytes);
+
       const key = this.fieldNumberToKey[fieldNumber];
+      const [data, dataLength] = decoder(fieldNumber, cursor + tagLength, bytes, finalObject[key]);
+
       finalObject[key] = data;
       cursor += dataLength + tagLength;
     }
