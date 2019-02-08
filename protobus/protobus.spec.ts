@@ -10,9 +10,9 @@ describe('Encode and Decode', () => {
       c: booleanField(3)
     });
     const bytes = new Uint8Array([
-      1, 0x96, 0x01,
-      2, 0x97, 0x01,
-      3, 0x01
+      0x08, 0x96, 0x01,
+      0x10, 0x97, 0x01,
+      0x18, 0x01
     ]);
     expect(SimpleTest.decode(bytes)).toEqual({
       a: 150,
@@ -30,8 +30,8 @@ describe('Encode and Decode', () => {
       inner: Inner.field(2)
     });
     const bytes = new Uint8Array([
-      1, 0x00,
-      2, 0x03, 1, 0x96, 0x01
+      0x08, 0x00,
+      0x10, 0x03, 0x08, 0x96, 0x01
     ]);
     expect(Outer.decode(bytes)).toEqual({
       outside: false,

@@ -94,11 +94,13 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
     let cursor = offset + sizeLength;
 
     while (cursor < end) {
-      const [fieldNumber, fieldNumberLength] = decodeUint32(cursor, bytes);
+      const [tag, tagLength] = decodeUint32(cursor, bytes);
+      const fieldNumber = tag >>> 3;
       const decoder = this.fieldNumberToDecoder[fieldNumber];
-      const [data, dataLength] = decoder(fieldNumber, cursor + fieldNumberLength, bytes);
-      finalObject[this.fieldNumberToKey[fieldNumber]] = data;
-      cursor += dataLength + fieldNumberLength;
+      const [data, dataLength] = decoder(fieldNumber, cursor + tagLength, bytes);
+      const key = this.fieldNumberToKey[fieldNumber];
+      finalObject[key] = data;
+      cursor += dataLength + tagLength;
     }
 
     return [finalObject as ObjectType<S>, messageLength + sizeLength];
