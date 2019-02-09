@@ -6,7 +6,7 @@ export function repeated<T extends ProtobufTypes>(field: Field<T>): Field<T[]> {
   const decode = field.decode;
   return {
     fieldNumbers: field.fieldNumbers,
-    encode: (data) => [0],
+    encode: (data) => [0, 0, []],
     decode: (fieldNumber, offset, bytes, lastDecoded) => {
       const [size, sizeLength] = decodeUint32(offset, bytes);
       const results = lastDecoded !== undefined ? lastDecoded.slice() : [];

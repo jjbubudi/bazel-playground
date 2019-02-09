@@ -1,6 +1,6 @@
 import { ProtobufTypes } from './types';
 
-export type Encoded = [number, ...number[]];
+export type Encoded = [number, number, number[]];
 export type Encoder<T extends ProtobufTypes> = (data: T) => Encoded;
 
 export type Decoded<T extends ProtobufTypes> = [T, number];

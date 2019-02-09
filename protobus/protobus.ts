@@ -15,60 +15,72 @@ export function protobufSchema<S extends Schema>(schema: S): CompiledSchema<S> {
 
 class Protobus<S extends Schema> implements CompiledSchema<S> {
 
-  private readonly fieldNumberToDecoder: Readonly<{ [fieldNumber: number]: Decoder<any> }>;
-  private readonly fieldNumberToKey: Readonly<{ [fieldNumber: number]: string }>;
-  private readonly keyToEncoder: Readonly<{ [key: string]: Encoder<any> }>;
-  private readonly keys: Readonly<string[]>;
+  private readonly decoders: Readonly<{ [fieldNumber: number]: Decoder<any> }>;
+  private readonly getters: Readonly<{ [fieldNumber: number]: (object: object) => any }>;
+  private readonly setters: Readonly<{ [fieldNumber: number]: (object: object, value: any) => void }>;
+  private readonly encoders: Readonly<{ [key: string]: Encoder<any> }>;
 
   constructor(schema: S) {
-    const fieldNumberToDecoder: { [fieldNumber: number]: Decoder<any> } = {};
-    const fieldNumberToKey: { [fieldNumber: number]: string } = {};
-    const keyToEncoder: { [key: string]: Encoder<any> } = {};
-    const keys: string[] = [];
+    const decoders: { [fieldNumber: number]: Decoder<any> } = {};
+    const getters: { [fieldNumber: number]: () => any } = {};
+    const setters: { [fieldNumber: number]: (value: any) => void } = {};
+    const encoders: { [key: string]: Encoder<any> } = {};
 
     for (const k in schema) {
       if (!schema.hasOwnProperty(k)) {
         continue;
       }
+      const field = schema[k];
       for (let i = 0; i < schema[k].fieldNumbers.length; i++) {
-        fieldNumberToKey[schema[k].fieldNumbers[i]] = k;
-        fieldNumberToDecoder[schema[k].fieldNumbers[i]] = schema[k].decode;
+        const fieldNumber = field.fieldNumbers[i];
+        decoders[fieldNumber] = field.decode;
+        getters[fieldNumber] = new Function('proto', `return proto.${k};`) as any;
+        setters[fieldNumber] = new Function('proto', 'value', `proto.${k} = value;`) as any;
       }
-      keyToEncoder[k] = schema[k].encode;
-      keys.push(k);
+      encoders[k] = field.encode;
     }
 
-    this.fieldNumberToDecoder = fieldNumberToDecoder;
-    this.fieldNumberToKey = fieldNumberToKey;
-    this.keyToEncoder = keyToEncoder;
-    this.keys = keys;
+    this.decoders = decoders;
+    this.getters = getters;
+    this.setters = setters;
+    this.encoders = encoders;
   }
 
   field(fieldNumber: number): Field<ObjectType<S>> {
-    const decode = this.decodeDelimited.bind(this);
     return {
       fieldNumbers: [fieldNumber],
-      encode: (data) => [0],
-      decode: (_, offset, bytes, lastDecoded) => decode(offset, bytes, lastDecoded)
+      encode: (data) => [0, 0, []],
+      decode: (_, offset, bytes, lastDecoded) => this.decodeDelimited(offset, bytes, lastDecoded)
     };
   }
 
   encode(o: ObjectType<S>): Uint8Array {
-    const encoded: number[] = [];
-    const keysLength = this.keys.length;
+    const encoded: number[][] = [];
+    const tags: number[][] = [];
+    const keys = Object.keys(this.encoders);
+    let dataLength = 0;
 
-    for (let i = 0; i < keysLength; i++) {
-      const key = this.keys[i];
-      const [fieldNumber, wireType, ...data] = this.keyToEncoder[key](o[key]);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const [fieldNumber, wireType, data] = this.encoders[key](o[key]);
       const tag = encodeUint32((fieldNumber << 3) | wireType);
-      encoded.push(...tag);
-      encoded.push(...data);
+      tags.push(tag);
+      encoded.push(data);
+      dataLength += (tag.length + data.length);
     }
 
-    const length = encoded.length;
-    const bytes = new Uint8Array(length);
-    for (let i = 0; i < length; i++) {
-      bytes[i] = encoded[i];
+    const bytes = new Uint8Array(dataLength);
+    let cursor = 0;
+
+    for (let i = 0; i < keys.length; i++) {
+        const tag = tags[i];
+        const data = encoded[i];
+        for (let j = 0; j < tag.length; j++) {
+          bytes[cursor++] = tag[j];
+        }
+        for (let k = 0; k < data.length; k++) {
+          bytes[cursor++] = data[k];
+        }
     }
 
     return bytes;
@@ -96,12 +108,12 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
     while (cursor < end) {
       const [tag, tagLength] = decodeUint32(cursor, bytes);
       const fieldNumber = tag >>> 3;
-      const decoder = this.fieldNumberToDecoder[fieldNumber];
 
-      const key = this.fieldNumberToKey[fieldNumber];
-      const [data, dataLength] = decoder(fieldNumber, cursor + tagLength, bytes, finalObject[key]);
+      const decoder = this.decoders[fieldNumber];
+      const existing = this.getters[fieldNumber](finalObject);
+      const [data, dataLength] = decoder(fieldNumber, cursor + tagLength, bytes, existing);
 
-      finalObject[key] = data;
+      this.setters[fieldNumber](finalObject, data);
       cursor += dataLength + tagLength;
     }
 

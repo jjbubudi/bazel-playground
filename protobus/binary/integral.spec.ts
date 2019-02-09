@@ -46,8 +46,8 @@ describe('Integral encode and decode', () => {
 
     it('should encode boolean into varint', () => {
       [
-        { value: true, bytes: [fieldNumber, WireType.Varint, 0x01] },
-        { value: false, bytes: [fieldNumber, WireType.Varint, 0x00] }
+        { value: true, bytes: [fieldNumber, WireType.Varint, [0x01]] },
+        { value: false, bytes: [fieldNumber, WireType.Varint, [0x00]] }
       ].forEach(({ value, bytes }) => {
         expect(field.encode(value)).toEqual(bytes);
       });

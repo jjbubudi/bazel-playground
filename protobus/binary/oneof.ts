@@ -22,7 +22,7 @@ export function oneof<S extends Schema>(schema: S): Field<Oneof<S>> {
 
   return {
     fieldNumbers: fieldNumbers,
-    encode: (data) => [0],
+    encode: (data) => [0, 0, []],
     decode: (fieldNumber, offset, bytes) => {
       const [value, length] = fieldNumberToDecoder[fieldNumber](fieldNumber, offset, bytes);
       return [{
