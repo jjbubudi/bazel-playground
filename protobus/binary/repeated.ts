@@ -1,19 +1,33 @@
-import { ProtobufTypes } from '../language/types';
+import { ProtobufTypes, WireType } from '../language/types';
 import { Field } from '../language/schema';
-import { decodeUint32 } from './integral';
+import { decodeUint32, encodeUint32 } from './integral';
 
-export function repeated<T extends ProtobufTypes>(field: Field<T>): Field<T[]> {
+export function repeated<T extends ProtobufTypes>(
+  fieldNumber: number,
+  createField: (fieldNumber: number) => Field<T>): Field<T[]> {
+  const field = createField(fieldNumber);
   const decode = field.decode;
   return {
-    fieldNumbers: field.fieldNumbers,
-    encode: (data) => [0, 0, []],
-    decode: (fieldNumber, offset, bytes, lastDecoded) => {
+    fieldNumbers: [fieldNumber],
+    encode: (data) => {
+      const encoded: number[] = [];
+      let dataLength = 0;
+      for (let i = 0; i < data.length; i++) {
+        const e = field.encode(data[i])[2];
+        encoded.push(...e);
+        dataLength += e.length;
+      }
+      const length = encodeUint32(dataLength);
+      length.push(...encoded);
+      return [fieldNumber, WireType.Delimited, length];
+    },
+    decode: (_, offset, bytes, lastDecoded) => {
       const [size, sizeLength] = decodeUint32(offset, bytes);
       const results = lastDecoded !== undefined ? lastDecoded.slice() : [];
       let cursor = 0;
 
       while (cursor < size) {
-        const [data, length] = decode(fieldNumber, cursor + offset + sizeLength, bytes);
+        const [data, length] = decode(_, cursor + offset + sizeLength, bytes);
         results.push(data);
         cursor += length;
       }

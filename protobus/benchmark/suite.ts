@@ -10,7 +10,7 @@ const InnerInner = protobufSchema({
 });
 
 const Outer = protobufSchema({
-  bool: repeated(booleanField(1)),
+  bool: repeated(1, booleanField),
   double: int32Field(2)
 });
 
@@ -62,14 +62,21 @@ const testJson = `
 }
 `;
 
-const suite = new Benchmark.Suite();
+const testObject = Test.decode(testBytes);
 
+const suite = new Benchmark.Suite();
 suite
   .add('JSON decode', () => {
     JSON.parse(testJson);
   })
   .add('Protobuf decode', () => {
     Test.decode(testBytes);
+  })
+  .add('JSON encode', () => {
+    JSON.stringify(testObject);
+  })
+  .add('Protobuf encode', () => {
+    Test.encode(testObject);
   })
   .on('cycle', (event: Benchmark.Event) => {
     console.log(String(event.target));

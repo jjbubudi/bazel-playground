@@ -1,5 +1,6 @@
 import { ObjectType, Decoded, Decoder, Field, Schema, Encoder } from './language/schema';
 import { decodeUint32, encodeUint32 } from './binary/integral';
+import { WireType } from './language/types';
 
 export type SchemaType<T extends CompiledSchema<any>> = T extends CompiledSchema<infer R> ? R : never;
 
@@ -49,12 +50,17 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
   field(fieldNumber: number): Field<ObjectType<S>> {
     return {
       fieldNumbers: [fieldNumber],
-      encode: (data) => [0, 0, []],
+      encode: (data) => {
+        const encoded = this.encodeDynamic(data, (dataLength) => new Array(dataLength));
+        const length = encodeUint32(encoded.length);
+        length.push(...encoded);
+        return [fieldNumber, WireType.Delimited, length];
+      },
       decode: (_, offset, bytes, lastDecoded) => this.decodeDelimited(offset, bytes, lastDecoded)
     };
   }
 
-  encode(o: ObjectType<S>): Uint8Array {
+  encodeDynamic<T extends Uint8Array | number[]>(object: ObjectType<S>, f: (dataLength: number) => T): T {
     const encoded: number[][] = [];
     const tags: number[][] = [];
     const keys = Object.keys(this.encoders);
@@ -62,14 +68,14 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      const [fieldNumber, wireType, data] = this.encoders[key](o[key]);
+      const [fieldNumber, wireType, data] = this.encoders[key](object[key]);
       const tag = encodeUint32((fieldNumber << 3) | wireType);
       tags.push(tag);
       encoded.push(data);
       dataLength += (tag.length + data.length);
     }
 
-    const bytes = new Uint8Array(dataLength);
+    const bytes = f(dataLength);
     let cursor = 0;
 
     for (let i = 0; i < keys.length; i++) {
@@ -84,6 +90,10 @@ class Protobus<S extends Schema> implements CompiledSchema<S> {
     }
 
     return bytes;
+  }
+
+  encode(object: ObjectType<S>): Uint8Array {
+    return this.encodeDynamic(object, (dataLength) => new Uint8Array(dataLength));
   }
 
   decodeDelimited(offset: number, bytes: Readonly<Uint8Array>, lastDecoded?: ObjectType<S>): Decoded<ObjectType<S>> {

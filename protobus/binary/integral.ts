@@ -39,7 +39,7 @@ export function uint32Field(fieldNumber: number): Field<Uint32> {
 export function int32Field(fieldNumber: number): Field<Int32> {
   return {
     fieldNumbers: [fieldNumber],
-    encode: (data) => [0, 0, []],
+    encode: (data) => [fieldNumber, WireType.Varint, encodeUint32(data)],
     decode: (_, offset, bytes) => {
       const result = decodeUint32(offset, bytes);
       result[0] = result[0] | 0;
