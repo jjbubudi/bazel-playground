@@ -59,7 +59,8 @@ http_archive(
     name = "io_bazel_rules_scala",
     url = "https://github.com/bazelbuild/rules_scala/archive/326b4ce252c36aeff2232e241ff4bfd8d6f6e071.zip",
     type = "zip",
-    strip_prefix= "rules_scala-326b4ce252c36aeff2232e241ff4bfd8d6f6e071"
+    strip_prefix= "rules_scala-326b4ce252c36aeff2232e241ff4bfd8d6f6e071",
+    sha256 = "60312e4ef03cdfea4db52b2c37a660f16e1a2afd665a872769925fcfd1509855"
 )
 
 load("//tools:scala_rules.bzl", "enable_scala")
@@ -72,7 +73,8 @@ http_archive(
     name = "io_bazel_rules_kotlin",
     urls = ["https://github.com/bazelbuild/rules_kotlin/archive/cab5eaffc2012dfe46260c03d6419c0d2fa10be0.zip"],
     type = "zip",
-    strip_prefix = "rules_kotlin-cab5eaffc2012dfe46260c03d6419c0d2fa10be0"
+    strip_prefix = "rules_kotlin-cab5eaffc2012dfe46260c03d6419c0d2fa10be0",
+    sha256 = "f1293902a15397a10957e866f133dcd027a0a6d21eae8c4fb7557f010add8a09"
 )
 
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories", "kt_register_toolchains")
@@ -94,6 +96,7 @@ http_archive(
     name = "gmaven_rules",
     url = "https://github.com/bazelbuild/gmaven_rules/archive/20181031-1.tar.gz",
     strip_prefix = "gmaven_rules-20181031-1",
+    sha256 = "51cdfdd8a73f6a4cf52da18b15c7e51f8dee5a5c101239db85655baa0e1195ab"
 )
 
 load("//tools:gmaven.bzl", "gmaven_rules")
@@ -122,6 +125,7 @@ http_archive(
     name = "build_bazel_rules_nodejs",
     url = "https://github.com/bazelbuild/rules_nodejs/archive/1f6d878a9ea3a095291f66e3d1a0f6b4641f5159.zip",
     strip_prefix = "rules_nodejs-1f6d878a9ea3a095291f66e3d1a0f6b4641f5159",
+    sha256 = "895c2b0d1480834808216fb36cd4bf21517954cb966c893ee42421dfefcfd4bc"
 )
 
 load("@build_bazel_rules_nodejs//:package.bzl", "rules_nodejs_dependencies")
@@ -146,6 +150,7 @@ http_archive(
     name = "build_bazel_rules_typescript",
     url = "https://github.com/bazelbuild/rules_typescript/archive/2963b55370b21d545d0ac0f30fca9dc74a0f5538.zip",
     strip_prefix = "rules_typescript-2963b55370b21d545d0ac0f30fca9dc74a0f5538",
+    sha256 = "5a31a67550d2a92270599e90a221afe229f6e1863bf2eff22e9750c6ecf45978"
 )
 http_archive(
     name = "ts_protoc_gen",
@@ -170,6 +175,7 @@ http_archive(
     name = "io_bazel_rules_sass",
     url = "https://github.com/bazelbuild/rules_sass/archive/1.15.2.zip",
     strip_prefix = "rules_sass-1.15.2",
+    sha256 = "96cedd370d8b87759c8b4a94e6e1c3bef7c17762770215c65864d9fba40f07cf"
 )
 http_archive(
     name = "io_bazel_rules_webtesting",
@@ -193,7 +199,8 @@ browser_repositories(
 http_archive(
     name = "angular",
     url = "https://github.com/angular/angular/archive/7.1.4.zip",
-    strip_prefix = "angular-7.1.4"
+    strip_prefix = "angular-7.1.4",
+    sha256 = "da57b86d25476f7ebfa9cb2ab159e287834bad811e98854d827fe64c2f96fd36"
 )
 http_archive(
     name = "rxjs",
